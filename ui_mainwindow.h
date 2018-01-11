@@ -30,6 +30,7 @@ public:
     QWidget *centralWidget;
     QPushButton *pushButton;
     QTextEdit *textEdit;
+    QPushButton *pushButton_2;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -47,6 +48,9 @@ public:
         textEdit = new QTextEdit(centralWidget);
         textEdit->setObjectName(QStringLiteral("textEdit"));
         textEdit->setGeometry(QRect(10, 10, 104, 71));
+        pushButton_2 = new QPushButton(centralWidget);
+        pushButton_2->setObjectName(QStringLiteral("pushButton_2"));
+        pushButton_2->setGeometry(QRect(810, 80, 75, 23));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -68,6 +72,7 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", Q_NULLPTR));
         pushButton->setText(QApplication::translate("MainWindow", "\350\247\206\351\242\221\346\211\223\346\240\207", Q_NULLPTR));
+        pushButton_2->setText(QApplication::translate("MainWindow", "\345\233\276\345\203\217\346\211\223\346\240\207", Q_NULLPTR));
     } // retranslateUi
 
 };
