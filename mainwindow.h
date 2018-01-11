@@ -14,7 +14,9 @@
 #include <string>
 #include <vector>
 #include <fstream>
-
+#include <QDir>
+#include <QFileDialog>
+#include <QDebug>
 using namespace std;
 using namespace cv;
 namespace Ui {
@@ -33,14 +35,18 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
+    QString dirname;
     QString filename;
     QString str;
     ~MainWindow();
-
+    void setDir();
 private slots:
     void on_pushButton_clicked();
     //Get String from LabelMark
     void receiveData(QString data);
+
+    void on_pushButton_2_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
