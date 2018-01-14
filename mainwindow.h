@@ -37,7 +37,10 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     QString dirname;
     QString filename;
-    QString str;
+    QString quality;
+    QString language;
+    QString scene;
+    QStringList str;
     ~MainWindow();
     void setDir();
 private slots:
