@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "LabelMark.h"
+#include "imagewidget.h"
 Mat img_original, img_drawing;
 Point quad [4];
 int pointNum = 0;
@@ -9,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
 
 }
 
@@ -68,7 +70,38 @@ void onMouse(int event, int x, int y, int, void*)
     imshow("Picture", img_drawing);
     return;
 }
+void onMouseVideo(int event, int x, int y, int, void*)
+{
 
+
+    switch (event)
+    {
+    case CV_EVENT_LBUTTONDOWN:
+        quad[pointNum%4].x = x;
+        quad[pointNum%4].y = y;
+        cout<<"x = "<<x<<" y = "<<y<<endl;
+        pointNum++;
+
+        break;
+    case CV_EVENT_LBUTTONUP:
+        //finish drawing the rect (use color green for finish)
+
+        circle(img_drawing,cvPoint(x,y),1,Scalar(0, 255, 0),2,8,0);
+
+        if(pointNum == 4)
+        {
+            pointNum = 0;
+
+            cout<<"draw quadri line"<<endl;
+            drawQuadri(quad);
+        }
+
+        break;
+    }
+
+    imshow("Video", img_drawing);
+    return;
+}
 void MainWindow::on_pushButton_clicked()
 {
     namedWindow("Video");
@@ -77,7 +110,7 @@ void MainWindow::on_pushButton_clicked()
     capture >> img_original;
     img_original.copyTo(img_drawing);
     imshow("Video", img_original);
-    setMouseCallback("Video", onMouse, 0);
+    setMouseCallback("Video", onMouseVideo, 0);
     int frame_counter = 0;
     while (1){
         int c = waitKey(0);
@@ -145,7 +178,8 @@ void MainWindow::on_pushButton_clicked()
 }
 void MainWindow::receiveData(QString data)
 {
-    ui->textEdit->setText(data);     //获取传递过来的数据
+    QString showlist = ui->textEdit->toPlainText() + '\n' + data;
+    ui->textEdit->setText(showlist);     //获取传递过来的数据
 }
 
 void MainWindow::setDir(){
@@ -262,4 +296,10 @@ void MainWindow::on_pushButton_2_clicked()
         }
         imshow("Picture", img_drawing);
     }
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    ImageWidget *w = new ImageWidget(ui->scrollArea);
+    ui->scrollArea->setWidget(w);
 }

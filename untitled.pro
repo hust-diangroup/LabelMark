@@ -14,13 +14,16 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    LabelMark.cpp
+    LabelMark.cpp \
+    imagewidget.cpp
 
 HEADERS  += mainwindow.h \
-    LabelMark.h
+    LabelMark.h \
+    imagewidget.h
 
 FORMS    += mainwindow.ui \
-    LabelMark.ui
+    LabelMark.ui \
+    imagewidget.ui
 
 INCLUDEPATH += C:\Users\Angelo\Desktop\install\include
 INCLUDEPATH+=C:\Users\Angelo\Desktop\install\include\opencv
