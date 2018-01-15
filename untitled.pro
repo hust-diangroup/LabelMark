@@ -19,7 +19,8 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     LabelMark.h \
-    imagewidget.h
+    imagewidget.h \
+    FileOperation.h
 
 FORMS    += mainwindow.ui \
     LabelMark.ui \

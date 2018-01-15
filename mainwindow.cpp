@@ -54,7 +54,7 @@ void onMouse(int event, int x, int y, int, void*)
     case CV_EVENT_LBUTTONDOWN:
         quad[quadNum][pointNum%4].x = x;
         quad[quadNum][pointNum%4].y = y;
-        cout<<"x = "<<x<<" y = "<<y<<endl;
+        //cout<<"x = "<<x<<" y = "<<y<<endl;
         pointNum++;
 
         break;
@@ -97,7 +97,7 @@ void MainWindow::on_pushButton_clicked()
     int frame_counter = 0;
     flag = video;
     if(list.length() == 0){
-
+        return;
     }
     else{
         filename = list.at(frame_counter).fileName();
@@ -242,7 +242,8 @@ void MainWindow::on_pushButton_clicked()
 }
 void MainWindow::receiveData(QString data)
 {
-    ui->textEdit->setText(data);     //获取传递过来的数据
+    QString showlist = ui->textEdit->toPlainText() + '\n' + data;
+    ui->textEdit->setText(showlist);     //获取传递过来的数据
     str << data;
     quality = "low";
     language = "Chinese";
@@ -282,7 +283,7 @@ void MainWindow::on_pushButton_2_clicked()
     int pic_counter = 0;
     flag = picture;
     if(list.length() == 0){
-
+        return;
     }
     else{
         filename = list.at(pic_counter).fileName();
