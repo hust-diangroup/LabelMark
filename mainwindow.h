@@ -43,6 +43,7 @@ public:
     QStringList str;
     ~MainWindow();
     void setDir();
+
 private slots:
     void on_pushButton_clicked();
     //Get String from LabelMark
