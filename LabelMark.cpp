@@ -8,6 +8,7 @@ LabelMark::LabelMark(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("LabelMark");
     qDebug("hehe<<<%s", qPrintable( str ) );
+
 }
 
 LabelMark::~LabelMark()
@@ -17,13 +18,20 @@ LabelMark::~LabelMark()
 }
 
 
-void LabelMark::keyPressEvent(QKeyEvent *event)
+void LabelMark::on_languageLine_returnPressed()
 {
-    if (event->key() == Qt::Key_Return){
-        str = ui->lineEdit->text();
-        emit sendData(ui->lineEdit->text());
-        qDebug("test<<<%s", qPrintable( str ) );
-        this->close();
-    }
+    str = ui->markLine->text() + "," + ui->sceneLine->text() + "," + ui->languageLine->text();
+    emit sendData(str);
+    qDebug("test<<<%s", qPrintable( str ) );
+    this->close();
+}
 
+void LabelMark::on_sceneLine_returnPressed()
+{
+    ui->languageLine->setFocus();
+}
+
+void LabelMark::on_markLine_returnPressed()
+{
+    ui->sceneLine->setFocus();
 }

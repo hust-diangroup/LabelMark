@@ -5,22 +5,18 @@
 #include <QListWidget>
 #include <QVBoxLayout>
 #include <QListWidgetItem>
-#include "LabelMark.h"
+
 Mat img_original, img_drawing;
 Point quad[100][4];
 int pointNum = 0;
 int quadNum = 0;
+bool flags;
+ImageWidget::ImageWidget(QWidget *parent, bool flag, QString dirname)
+    : QWidget(parent),
+      flag(flag),
+      dirname(dirname)
 
-enum buttonlabel{
-    video,
-    picture
-};
-buttonlabel flag = video;
-void drawQuadri (Point * quad);
-int isempty(Point * quad);
-void onMouse(int event, int x, int y, int, void*);
-ImageWidget::ImageWidget(QWidget *parent, QString filename)
-    : QWidget(parent),m_strPath(filename){
+{
     this->init();
 }
 
@@ -37,6 +33,7 @@ void ImageWidget::init() {
     const QSize ITEM_SIZE(240, 190);
 
     // 判断路径是否存在
+    m_strPath = dirname;
     QDir dir(m_strPath);
     if (!dir.exists()) {
         return;
@@ -44,7 +41,11 @@ void ImageWidget::init() {
     // 设置过滤器
     dir.setFilter(QDir::Files | QDir::NoSymLinks);
     QStringList filters;
-    filters << "*.png" << "*.jpg";
+    if(flag){
+        filters << "*.png" << "*.jpg";
+    }else{
+        filters << "*.avi"<<"*.mp4";//设置过滤类型                                       x
+    }
     dir.setNameFilters(filters);
     m_imgList = dir.entryList();
     if (m_imgList.count() <= 0) {
@@ -67,6 +68,12 @@ void ImageWidget::init() {
         m_listWidget->insertItem(i, listWidgetItem);
     }
 
+    textEdit = new QTextEdit(this);
+    textEdit->setObjectName(QStringLiteral("textEdit"));
+    textEdit->setGeometry(QRect(300, 10, 150, 450));
+    textEdit->setText("打标内容:");
+    textEdit->setFocusPolicy(Qt::NoFocus);
+
     // 窗口布局
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(m_listWidget);
@@ -75,67 +82,75 @@ void ImageWidget::init() {
 
     // 信号与槽
     connect(m_listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(slot_itemClicked(QListWidgetItem*)));
+
+    flags = flag;
 }
 
 // 最大化窗口显示图像
 void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
-    m_showWidget.setPixmap(QPixmap(m_strPath + "\\" + m_imgList.at(m_listWidget->row(item))));
-    m_showWidget.showMaximized();
-        int pic_counter = m_listWidget->row(item);
-    QString filename =  m_strPath + "\\" + m_imgList.at(pic_counter);
+   // m_showWidget.setPixmap(QPixmap(m_strPath + "\\" + m_imgList.at(m_listWidget->row(item))));
+    //m_showWidget.showMaximized();
 
-    flag = picture;
-    namedWindow("Picture");
-    ofstream outfile( "test.txt");
-    img_original = imread(filename.toStdString());
-    img_original.copyTo(img_drawing);
-    imshow("Picture",img_original);
-    setMouseCallback("Picture", onMouse, 0);
-    //qDebug()<<"first";
+    int counter = m_listWidget->row(item);
+    QString name = m_strPath + "\\" + m_imgList.at(counter);
+    fileoperation fileout;
 
+    VideoCapture capture(name.toStdString());
+    capture >> img_original;
+
+    if(flag){
+        namedWindow("Picture");
+        img_original = imread(name.toStdString());
+        img_original.copyTo(img_drawing);
+        imshow("Picture",img_original);
+        setMouseCallback("Picture", onMouse, 0);
+    }else{
+
+        namedWindow("Video");
+        img_original.copyTo(img_drawing);
+        imshow("Video", img_original);
+        setMouseCallback("Video", onMouse, 0);
+    }
 
 
     while (1){
+
         int c = waitKey(0);
         if ((c & 255) == 27)
         {
             cout << "Exiting ...\n";
-            memset(quad,0,400*sizeof(Point));
+            memset(quad,0,400*sizeof(Point));         //clear all the variables
             quadNum = 0;
             pointNum = 0;
             str.clear();
             quality.clear();
             language.clear();
             scene.clear();
-            destroyWindow("Picture");
+            if(flag){
+                destroyWindow("Video");
+            }else{
+                destroyWindow("Picture");
+            }
+
             return;
         }
         switch ((char)c)
         {
         case 'n':
-            //read the next frame
+            //set down the statistics
             if (pointNum != 0)
             {
                 cout << "No Transcription exists. If no label, please clear the points first." << endl;
                 break;
             }
-            if(str.count() != quadNum)
-            {
-                cout << "please ensure the number of Transcriptions is equal to the number of the quad" << endl;
-                break;
-            }
-            if (!str.isEmpty())
-            {
-                for (int indexnum = 0 ; indexnum < quadNum ; indexnum++)
-                {
-                    outfile << filename.toStdString() << " " << quad[indexnum][0].x << ","<< quad[indexnum][0].y << ","
-                        << quad[indexnum][1].x << ","<< quad[indexnum][1].y << ","
-                        << quad[indexnum][2].x << ","<< quad[indexnum][2].y << ","
-                        << quad[indexnum][3].x << ","<< quad[indexnum][3].y << "," << qPrintable(str[indexnum]) <<endl;
-                }
-            }
-            ++pic_counter;
-            for (int i = 0; i<quadNum ; i++)  //clear the variables
+
+
+           if(!fileout.VideoInfInput(name, counter, quadNum, ImageWidget::str, ImageWidget::quality, ImageWidget::language, ImageWidget::scene))//write the xml
+           {
+               cout << "Please check it again!" << endl;
+               break;
+           }
+            for (int i = 0; i<quadNum ; i++)    //clear the quad
             {
                 for (int j = 0; j<4 ; j++)
                 {
@@ -143,18 +158,33 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
                     quad[i][j].y = 0;
                 }
             }
+            ++counter;
             quadNum = 0;
             pointNum = 0;
             str.clear();
-
-            if (pic_counter >= m_listWidget->row(item)){
-                cout << "\nPicture Finished!" << endl;
+            if(m_imgList.count() == counter){
                 destroyWindow("Picture");
                 return;
             }
-            filename =  m_strPath + "\\" + m_imgList.at(pic_counter);
-            //qDebug()<<name;
-            img_original = imread(filename.toStdString());
+            if(flag){
+                name = m_strPath + "\\" + m_imgList.at(counter);
+                img_original = imread(name.toStdString());
+                img_original.copyTo(img_drawing);
+            }else{
+                capture >> img_original;   //move to the next frame
+            }
+
+            if (img_original.empty()){
+
+                fileout.VideoFinalInfInput(name);
+                if(flag){
+                    destroyWindow("Video");
+                }else{
+                    destroyWindow("Picture");
+                }
+                return;
+            }
+
             img_original.copyTo(img_drawing);
             break;
         case 'z':
@@ -168,7 +198,7 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
             quad[quadNum][pointNum].x=0;
             quad[quadNum][pointNum].y=0;
             img_original.copyTo(img_drawing);
-            for (int i = 0 ; i < quadNum ; i++)
+            for (int i = 0 ; i < quadNum ; i++)     //redraw the points and the lines on the image.
             {
                 for(int j = 0 ; j < 4; j++)
                 {
@@ -180,10 +210,9 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
             {
                 circle(img_drawing,cvPoint(quad[quadNum][j].x,quad[quadNum][j].y),1,Scalar(0, 255, 0),2,8,0);
             }
-
             break;
         case 'c':
-            //clear quad array
+            //clear the last quad array
             if (quadNum > 0 && pointNum == 0)       //clear the last quad
             {
                 memset(quad[--quadNum],0,4*sizeof(Point));
@@ -215,12 +244,28 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
         case 'x':
             LabelMark *widget = new LabelMark;
             widget->show();
-            connect(widget, SIGNAL(sendData(QString)), this, SLOT(receiveData(QString)));
+            connect(widget, SIGNAL(sendData(QString)), this, SLOT(receiveDataSave(QString)));
             break;
         }
-        imshow("Picture", img_drawing);
+
+        if(flag){
+            imshow("Picture", img_drawing);
+        }else{
+            imshow("Video", img_drawing);
+        }
+
     }
 }
+
+void ImageWidget::receiveDataSave(QString data){
+    QString showlist = this->textEdit->toPlainText() + '\n' + data;
+    this->textEdit->setText(showlist);     //获取传递过来的数据
+    str << data;
+    quality = "low";
+    language = "Chinese";
+    scene = "Station";
+}
+
 
 void drawQuadri (Point * quadPoint) {
     for(int i = 0; i < 4; i++)
@@ -270,13 +315,59 @@ void onMouse(int event, int x, int y, int, void*)
 
         break;
     }
-    if (flag == picture)
-    {
+    if (flags){
         imshow("Picture", img_drawing);
-    }
-    else if (flag == video)
-    {
+    }else{
         imshow("Video", img_drawing);
     }
     return;
 }
+
+int fileoperation::VideoInfInput(QString name, int frame_counter, int quadNum, QStringList str, QString quality, QString language, QString scene)
+{
+
+    if (str.count() != quadNum)
+    {
+        cout << "please ensure the number of Transcriptions is equal to the number of the quad" <<endl;
+        return 0;
+    }
+    QString postfix = ".txt";
+    QString txtname = name + postfix;
+    ofstream   ofresult(txtname.toStdString(), ios::app);
+    if (frame_counter == 0)
+    {
+        ofresult << "<?xml version=\"1.0\" encoding=\"us-ascii\"?>" << endl;
+        ofresult << "<frames>" << endl;
+    }
+    if (isempty(quad[0]))
+    {
+        ofresult << "  <frame ID=\"" << frame_counter+1 << "\">" << endl;
+        ofresult << "  </frame>" << endl;
+    }
+    else
+    {
+        ofresult << "  <frame ID=\"" << frame_counter+1 << "\">" << endl;
+        for (int i = 0 ; i < quadNum ; i++)
+        {
+            ofresult << "    <object Transcription=\"" << qPrintable(str[i]) << "\" ID=\"" << i+1001 << "\" Quality=\"" << qPrintable(quality) <<"\" Language=\""<< qPrintable(language) <<"\" Scene=\" "<< qPrintable(scene) << "\">" << endl;
+            ofresult << "      <Point x=\""<< quad[i][0].x << "\" y=\"" << quad[i][0].y << "\" />" << endl;
+            ofresult << "      <Point x=\""<< quad[i][1].x << "\" y=\"" << quad[i][1].y << "\" />" << endl;
+            ofresult << "      <Point x=\""<< quad[i][2].x << "\" y=\"" << quad[i][2].y << "\" />" << endl;
+            ofresult << "      <Point x=\""<< quad[i][3].x << "\" y=\"" << quad[i][3].y << "\" />" << endl;
+            ofresult << "    </object>" << endl;
+        }
+        ofresult << "  </frame>" << endl;
+    }
+    ofresult.close();
+    return 1;
+}
+
+void fileoperation::VideoFinalInfInput(QString name)
+{
+    QString postfix = ".txt";
+    QString txtname = name + postfix;
+    ofstream   ofresult(txtname.toStdString(), ios::app);
+    ofresult << "</frames>" << endl;
+    ofresult.close();
+}
+

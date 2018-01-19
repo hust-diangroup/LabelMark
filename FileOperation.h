@@ -3,7 +3,11 @@
 #include <QDir>
 #include <QFile>
 #include <QTextStream>
-
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+using namespace std;
 class fileoperation
 {
 private:
@@ -14,6 +18,8 @@ public:
     void VideoFinalInfInput(QString name);
 //    void GetOutputDir();
 };
+
+
 
 
 

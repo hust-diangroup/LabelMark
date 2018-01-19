@@ -14,13 +14,7 @@
 namespace Ui {
 class LabelMark;
 }
-/********************************************************************
-    created:      2017/12/30
-    name:         LabelMark
-    author:       Yinhao
-    description:  Class for Label Mark
-                  Return QString to the main window
-*********************************************************************/
+
 class LabelMark : public QWidget
 {
     Q_OBJECT
@@ -28,7 +22,6 @@ class LabelMark : public QWidget
 public:
     explicit LabelMark(QWidget *parent = 0);
     ~LabelMark();
-    void keyPressEvent(QKeyEvent * event);
 private:
     Ui::LabelMark *ui;
 
@@ -37,6 +30,10 @@ private:
 signals:
     //return QString to the main window
     void sendData(QString);
+private slots:
+    void on_languageLine_returnPressed();
+    void on_sceneLine_returnPressed();
+    void on_markLine_returnPressed();
 };
 
 #endif // LabelMark_H

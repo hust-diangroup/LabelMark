@@ -1,6 +1,6 @@
 /********************************************************************
     created:    2017/12/30
-    file ext:   cpp
+    file ext:   header
     author:     Yinhao
     purpose:    Create a MainWindow
                 Using OpenCv to make a video into one frame
@@ -17,18 +17,15 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QDebug>
+#include "LabelMark.h"
+#include "imagewidget.h"
+#include "FileOperation.h"
 using namespace std;
 using namespace cv;
 namespace Ui {
 class MainWindow;
 }
-/********************************************************************
-    created:         2017/12/30
-    name:            cpp
-    author:          Yinhao
-    description::    Create a MainWindow
-                     //Choose video from documents
-*********************************************************************/
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -41,9 +38,9 @@ public:
     QString language;
     QString scene;
     QStringList str;
+    bool flag;
     ~MainWindow();
     void setDir();
-
 private slots:
     void on_pushButton_clicked();
     //Get String from LabelMark
@@ -51,15 +48,14 @@ private slots:
 
     void on_pushButton_2_clicked();
 
-    void on_pushButton_3_clicked();
+
+
+    void on_openDir_clicked();
 
 private:
     Ui::MainWindow *ui;
 };
 
 
-void drawQuadri (Point * quad);
-int isempty(Point * quad);
-void onMouse(int event, int x, int y, int, void*);
 
 #endif // MAINWINDOW_H
