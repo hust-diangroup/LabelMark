@@ -20,6 +20,7 @@
 #include "LabelMark.h"
 #include "imagewidget.h"
 #include "FileOperation.h"
+
 using namespace std;
 using namespace cv;
 namespace Ui {
@@ -32,6 +33,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
+
     QString dirname;
     QString filename;
     QString quality;

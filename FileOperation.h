@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <QtXml/QDomDocument>
+
 using namespace std;
 class fileoperation
 {
@@ -14,8 +16,8 @@ private:
 
 
 public:
-    int VideoInfInput(QString name, int frame_counter, int objnum, QStringList str, QString quality, QString language, QString scene);
-    void VideoFinalInfInput(QString name);
+    int SetFrameMessage(QDomDocument FrameMessage, QString name, int frame_counter, int objnum, QStringList str, QString quality, QString language, QString scene);
+    void VideoFinalInfInput(QDomDocument FrameMessage, QString name);
 //    void GetOutputDir();
 };
 
