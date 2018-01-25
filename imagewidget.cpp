@@ -5,6 +5,8 @@
 #include <QListWidget>
 #include <QVBoxLayout>
 #include <QListWidgetItem>
+#include <QDebug>
+
 
 Mat img_original, img_drawing;
 Point quad[100][4];
@@ -38,6 +40,7 @@ void ImageWidget::init() {
     if (!dir.exists()) {
         return;
     }
+
     // 设置过滤器
     dir.setFilter(QDir::Files | QDir::NoSymLinks);
     QStringList filters;
@@ -62,7 +65,7 @@ void ImageWidget::init() {
 
     // 创建单元项
     for (int i = 0; i<m_imgList.count(); ++i) {
-        QPixmap pixmap(m_strPath + "\\" + m_imgList.at(i));
+        QPixmap pixmap(m_strPath + "/" + m_imgList.at(i));
         QListWidgetItem *listWidgetItem = new QListWidgetItem(QIcon(pixmap.scaled(IMAGE_SIZE)), m_imgList.at(i));
         listWidgetItem->setSizeHint(ITEM_SIZE);
         m_listWidget->insertItem(i, listWidgetItem);
@@ -92,11 +95,22 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
     //m_showWidget.showMaximized();
 
     int counter = m_listWidget->row(item);
-    QString name = m_strPath + "\\" + m_imgList.at(counter);
+    QString name = m_strPath + "/" + m_imgList.at(counter);
     fileoperation fileout;
 
     VideoCapture capture(name.toStdString());
     capture >> img_original;
+
+    QDomDocument FrameMessage;
+//    QFileInfo FI(name+".xml");
+//    if (FI.isFile())
+//    {
+
+//    }
+    QString strHeader( "version=\"1.0\" encoding=\"us-ascii\"" );
+    FrameMessage.appendChild( FrameMessage.createProcessingInstruction("xml", strHeader) );
+    QDomElement MainFrameNode = FrameMessage.createElement("frames");
+    FrameMessage.appendChild(MainFrameNode);
 
     if(flag){
         namedWindow("Picture");
@@ -123,13 +137,14 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
             quadNum = 0;
             pointNum = 0;
             str.clear();
+            fileout.VideoFinalInfInput(FrameMessage, name);
             quality.clear();
             language.clear();
             scene.clear();
             if(flag){
-                destroyWindow("Video");
-            }else{
                 destroyWindow("Picture");
+            }else{
+                destroyWindow("Video");
             }
 
             return;
@@ -145,7 +160,7 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
             }
 
 
-           if(!fileout.VideoInfInput(name, counter, quadNum, ImageWidget::str, ImageWidget::quality, ImageWidget::language, ImageWidget::scene))//write the xml
+           if(!fileout.SetFrameMessage(FrameMessage, name, counter, quadNum, ImageWidget::str, ImageWidget::quality, ImageWidget::language, ImageWidget::scene))//write the xml
            {
                cout << "Please check it again!" << endl;
                break;
@@ -162,21 +177,21 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
             quadNum = 0;
             pointNum = 0;
             str.clear();
-            if(m_imgList.count() == counter){
-                destroyWindow("Picture");
-                return;
-            }
             if(flag){
+                if(m_imgList.count() == counter){
+                    destroyWindow("Picture");
+                    return;
+                }
                 name = m_strPath + "\\" + m_imgList.at(counter);
                 img_original = imread(name.toStdString());
                 img_original.copyTo(img_drawing);
             }else{
                 capture >> img_original;   //move to the next frame
             }
-
+                        qDebug()<< "aaaa";
             if (img_original.empty()){
 
-                fileout.VideoFinalInfInput(name);
+                fileout.VideoFinalInfInput(FrameMessage, name);
                 if(flag){
                     destroyWindow("Video");
                 }else{
@@ -323,7 +338,7 @@ void onMouse(int event, int x, int y, int, void*)
     return;
 }
 
-int fileoperation::VideoInfInput(QString name, int frame_counter, int quadNum, QStringList str, QString quality, QString language, QString scene)
+int fileoperation::SetFrameMessage(QDomDocument FrameMessage, QString name, int frame_counter, int quadNum, QStringList str, QString quality, QString language, QString scene)
 {
 
     if (str.count() != quadNum)
@@ -331,43 +346,79 @@ int fileoperation::VideoInfInput(QString name, int frame_counter, int quadNum, Q
         cout << "please ensure the number of Transcriptions is equal to the number of the quad" <<endl;
         return 0;
     }
-    QString postfix = ".txt";
-    QString txtname = name + postfix;
-    ofstream   ofresult(txtname.toStdString(), ios::app);
-    if (frame_counter == 0)
+//    QString postfix = ".txt";
+//    QString txtname = name + postfix;
+//    ofstream   ofresult(txtname.toStdString(), ios::app);
+    QDomElement MainFrameNode = FrameMessage.documentElement();
+    QDomElement FrameNode = FrameMessage.createElement("frame");
+    FrameNode.setAttribute("ID", QString::number(frame_counter+1));
+    for (int i = 0; i < quadNum ; i++)
     {
-        ofresult << "<?xml version=\"1.0\" encoding=\"us-ascii\"?>" << endl;
-        ofresult << "<frames>" << endl;
-    }
-    if (isempty(quad[0]))
-    {
-        ofresult << "  <frame ID=\"" << frame_counter+1 << "\">" << endl;
-        ofresult << "  </frame>" << endl;
-    }
-    else
-    {
-        ofresult << "  <frame ID=\"" << frame_counter+1 << "\">" << endl;
-        for (int i = 0 ; i < quadNum ; i++)
-        {
-            ofresult << "    <object Transcription=\"" << qPrintable(str[i]) << "\" ID=\"" << i+1001 << "\" Quality=\"" << qPrintable(quality) <<"\" Language=\""<< qPrintable(language) <<"\" Scene=\" "<< qPrintable(scene) << "\">" << endl;
-            ofresult << "      <Point x=\""<< quad[i][0].x << "\" y=\"" << quad[i][0].y << "\" />" << endl;
-            ofresult << "      <Point x=\""<< quad[i][1].x << "\" y=\"" << quad[i][1].y << "\" />" << endl;
-            ofresult << "      <Point x=\""<< quad[i][2].x << "\" y=\"" << quad[i][2].y << "\" />" << endl;
-            ofresult << "      <Point x=\""<< quad[i][3].x << "\" y=\"" << quad[i][3].y << "\" />" << endl;
-            ofresult << "    </object>" << endl;
+        QStringList XList,YList;
+        XList  << QString::number(quad[i][0].x,10)
+               << QString::number(quad[i][1].x,10)
+               << QString::number(quad[i][2].x,10)
+               << QString::number(quad[i][3].x,10);
+        YList  << QString::number(quad[i][0].y,10)
+               << QString::number(quad[i][1].y,10)
+               << QString::number(quad[i][2].y,10)
+               << QString::number(quad[i][3].y,10);
+        QDomElement ObjectNode = FrameMessage.createElement("object");
+        ObjectNode.setAttribute("Transcription", str[i]);
+        ObjectNode.setAttribute("ID", i+1001);
+        ObjectNode.setAttribute("Quality", quality);
+        ObjectNode.setAttribute("Language", language);
+        ObjectNode.setAttribute("Scene", scene);
+        for(int j = 0; j < 4; ++j) {
+            QDomElement attribNode = FrameMessage.createElement("Point");
+            attribNode.setAttribute("x", XList.at(j));
+            attribNode.setAttribute("y", YList.at(j));
+            ObjectNode.appendChild(attribNode);
         }
-        ofresult << "  </frame>" << endl;
+        FrameNode.appendChild(ObjectNode);
     }
-    ofresult.close();
+    MainFrameNode.appendChild(FrameNode);
+    FrameMessage.appendChild(MainFrameNode);
+//    if (frame_counter == 0)
+//    {
+//        ofresult << "<?xml version=\"1.0\" encoding=\"us-ascii\"?>" << endl;
+//        ofresult << "<frames>" << endl;
+//    }
+//    if (isempty(quad[0]))
+//    {
+//        ofresult << "  <frame ID=\"" << frame_counter+1 << "\">" << endl;
+//        ofresult << "  </frame>" << endl;
+//    }
+//    else
+//    {
+//        ofresult << "  <frame ID=\"" << frame_counter+1 << "\">" << endl;
+//        for (int i = 0 ; i < quadNum ; i++)
+//        {
+//            ofresult << "    <object Transcription=\"" << qPrintable(str[i]) << "\" ID=\"" << i+1001 << "\" Quality=\"" << qPrintable(quality) <<"\" Language=\""<< qPrintable(language) <<"\" Scene=\" "<< qPrintable(scene) << "\">" << endl;
+//            ofresult << "      <Point x=\""<< quad[i][0].x << "\" y=\"" << quad[i][0].y << "\" />" << endl;
+//            ofresult << "      <Point x=\""<< quad[i][1].x << "\" y=\"" << quad[i][1].y << "\" />" << endl;
+//            ofresult << "      <Point x=\""<< quad[i][2].x << "\" y=\"" << quad[i][2].y << "\" />" << endl;
+//            ofresult << "      <Point x=\""<< quad[i][3].x << "\" y=\"" << quad[i][3].y << "\" />" << endl;
+//            ofresult << "    </object>" << endl;
+//        }
+//        ofresult << "  </frame>" << endl;
+//    }
+//    ofresult.close();
     return 1;
 }
 
-void fileoperation::VideoFinalInfInput(QString name)
+void fileoperation::VideoFinalInfInput(QDomDocument FrameMessage, QString name)
 {
-    QString postfix = ".txt";
+    QString postfix = ".xml";
     QString txtname = name + postfix;
-    ofstream   ofresult(txtname.toStdString(), ios::app);
-    ofresult << "</frames>" << endl;
-    ofresult.close();
+//    ofstream   ofresult(txtname.toStdString(), ios::app);
+//    ofresult << "</frames>" << endl;
+//    ofresult.close();
+    QFile file(txtname);
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        return;
+    QTextStream stream(&file);
+    FrameMessage.save(stream, 4);
+    file.close();
 }
 
