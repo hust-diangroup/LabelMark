@@ -96,21 +96,12 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
 
     int counter = m_listWidget->row(item);
     QString name = m_strPath + "/" + m_imgList.at(counter);
-    fileoperation fileout;
 
     VideoCapture capture(name.toStdString());
     capture >> img_original;
 
-    QDomDocument FrameMessage;
-//    QFileInfo FI(name+".xml");
-//    if (FI.isFile())
-//    {
-
-//    }
-    QString strHeader( "version=\"1.0\" encoding=\"us-ascii\"" );
-    FrameMessage.appendChild( FrameMessage.createProcessingInstruction("xml", strHeader) );
-    QDomElement MainFrameNode = FrameMessage.createElement("frames");
-    FrameMessage.appendChild(MainFrameNode);
+    fileoperation fileout;
+    fileout.InitFrameMessage();
 
     if(flag){
         namedWindow("Picture");
@@ -119,10 +110,12 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
         imshow("Picture",img_original);
         setMouseCallback("Picture", onMouse, 0);
     }else{
-
+        fileout.ReadFile(name);
         namedWindow("Video");
         img_original.copyTo(img_drawing);
-        imshow("Video", img_original);
+//        QObject::connect(&fileout,SIGNAL(senddata(QString)),this,SLOT(receiveDataSave(QString)));
+        fileout.ReadFramequad(img_drawing);
+        imshow("Video", img_drawing);
         setMouseCallback("Video", onMouse, 0);
     }
 
@@ -137,13 +130,13 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
             quadNum = 0;
             pointNum = 0;
             str.clear();
-            fileout.VideoFinalInfInput(FrameMessage, name);
             quality.clear();
             language.clear();
             scene.clear();
             if(flag){
                 destroyWindow("Picture");
             }else{
+                fileout.VideoFinalInfInput(name);
                 destroyWindow("Video");
             }
 
@@ -160,7 +153,7 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
             }
 
 
-           if(!fileout.SetFrameMessage(FrameMessage, name, counter, quadNum, ImageWidget::str, ImageWidget::quality, ImageWidget::language, ImageWidget::scene))//write the xml
+           if(!fileout.SetFrameMessage(counter, quadNum, ImageWidget::str, ImageWidget::quality, ImageWidget::language, ImageWidget::scene))//write the xml
            {
                cout << "Please check it again!" << endl;
                break;
@@ -177,30 +170,35 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
             quadNum = 0;
             pointNum = 0;
             str.clear();
+            quality.clear();
+            language.clear();
+            scene.clear();
             if(flag){
                 if(m_imgList.count() == counter){
                     destroyWindow("Picture");
                     return;
                 }
-                name = m_strPath + "\\" + m_imgList.at(counter);
+                name = m_strPath + "/" + m_imgList.at(counter);
                 img_original = imread(name.toStdString());
                 img_original.copyTo(img_drawing);
             }else{
-                capture >> img_original;   //move to the next frame
-            }
-                        qDebug()<< "aaaa";
-            if (img_original.empty()){
 
-                fileout.VideoFinalInfInput(FrameMessage, name);
+                capture >> img_original;   //move to the next frame
+                img_original.copyTo(img_drawing);
+//                QObject::connect(&fileout,SIGNAL(senddata(QString)),this,SLOT(receiveDataSave(QString)));
+                fileout.ReadFramequad(img_drawing);
+            }
+
+            if (img_original.empty()){
                 if(flag){
-                    destroyWindow("Video");
-                }else{
                     destroyWindow("Picture");
+                }else{
+                    fileout.VideoFinalInfInput(name);
+                    destroyWindow("Video");
                 }
                 return;
             }
 
-            img_original.copyTo(img_drawing);
             break;
         case 'z':
             //undo the latest labeling point
@@ -275,10 +273,11 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
 void ImageWidget::receiveDataSave(QString data){
     QString showlist = this->textEdit->toPlainText() + '\n' + data;
     this->textEdit->setText(showlist);     //获取传递过来的数据
-    str << data;
+    QStringList datalist = data.split(',');
+    str << datalist[0];
     quality = "low";
-    language = "Chinese";
-    scene = "Station";
+    language << datalist[1];
+    scene = datalist[2];
 }
 
 
@@ -338,9 +337,9 @@ void onMouse(int event, int x, int y, int, void*)
     return;
 }
 
-int fileoperation::SetFrameMessage(QDomDocument FrameMessage, QString name, int frame_counter, int quadNum, QStringList str, QString quality, QString language, QString scene)
+int fileoperation::SetFrameMessage(int frame_counter, int quadNum, QStringList str, QString quality, QStringList language, QString scene)
 {
-
+    //set the message from quad and str to Frame
     if (str.count() != quadNum)
     {
         cout << "please ensure the number of Transcriptions is equal to the number of the quad" <<endl;
@@ -367,7 +366,7 @@ int fileoperation::SetFrameMessage(QDomDocument FrameMessage, QString name, int 
         ObjectNode.setAttribute("Transcription", str[i]);
         ObjectNode.setAttribute("ID", i+1001);
         ObjectNode.setAttribute("Quality", quality);
-        ObjectNode.setAttribute("Language", language);
+        ObjectNode.setAttribute("Language", language[i]);
         ObjectNode.setAttribute("Scene", scene);
         for(int j = 0; j < 4; ++j) {
             QDomElement attribNode = FrameMessage.createElement("Point");
@@ -407,8 +406,9 @@ int fileoperation::SetFrameMessage(QDomDocument FrameMessage, QString name, int 
     return 1;
 }
 
-void fileoperation::VideoFinalInfInput(QDomDocument FrameMessage, QString name)
+void fileoperation::VideoFinalInfInput(QString name)
 {
+    //write to the file
     QString postfix = ".xml";
     QString txtname = name + postfix;
 //    ofstream   ofresult(txtname.toStdString(), ios::app);
@@ -422,3 +422,60 @@ void fileoperation::VideoFinalInfInput(QDomDocument FrameMessage, QString name)
     file.close();
 }
 
+void fileoperation::InitFrameMessage()
+{
+    //set the header and <frames> for the new FrameMessage
+    QString strHeader( "version=\"1.0\" encoding=\"us-ascii\"" );
+    FrameMessage.appendChild( FrameMessage.createProcessingInstruction("xml", strHeader) );
+    QDomElement MainFrameNode = FrameMessage.createElement("frames");
+    FrameMessage.appendChild( MainFrameNode );
+}
+
+void fileoperation::ReadFile(QString name)
+{
+    //if file already exist
+    QFileInfo FI(name+".xml");
+    if (FI.isFile())
+    {
+        QFile file(name+".xml");
+        FileMessage.setContent(&file);
+        FIleMainFrameNode = FileMessage.documentElement();
+        TmpFileFrameNode = FIleMainFrameNode.firstChild();
+    }
+}
+
+void fileoperation::ReadFramequad(Mat img_drawing)
+{
+    //Read the next Frame
+    if ( !TmpFileFrameNode.isNull() )
+    {
+        QDomNode ObjectNode = TmpFileFrameNode.firstChild();
+        while ( !ObjectNode.isNull() )
+        {
+            QString data = ObjectNode.toElement().attributeNode("Transcription").value()
+                    + ObjectNode.toElement().attributeNode("Language").value()
+                    + ObjectNode.toElement().attributeNode("Scene").value();
+
+//            emit senddata(data);
+            QDomNode PointNode = ObjectNode.firstChild();
+            for (int i=0; i<4 ;i++)
+            {
+                QDomElement PointElement = PointNode.toElement();
+                quad[quadNum][i].x = PointElement.attributeNode("x").value().toInt();
+                quad[quadNum][i].y = PointElement.attributeNode("y").value().toInt();
+                PointNode = PointNode.nextSibling();
+            }
+            quadNum++;
+            ObjectNode = ObjectNode.nextSibling();
+        }
+        for (int i = 0 ; i < quadNum ; i++)   //redraw the rest of the quads
+        {
+            for(int j = 0 ; j < 4; j++)
+            {
+                circle(img_drawing,cvPoint(quad[i][j].x,quad[i][j].y),1,Scalar(0, 255, 0),2,8,0);
+            }
+            drawQuadri(quad[i]);
+        }
+    }
+    TmpFileFrameNode = TmpFileFrameNode.nextSibling();
+}

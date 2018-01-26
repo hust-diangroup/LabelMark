@@ -29,7 +29,7 @@ public:
 
     QString dirname;
     QString quality;
-    QString language;
+    QStringList language;
     QString scene;
     QString showdata;
     QStringList str;
@@ -49,6 +49,7 @@ private:
 signals:
     void sendToShow(QString);
 };
+
 
 void drawQuadri (Point * quad);
 int isempty(Point * quad);
