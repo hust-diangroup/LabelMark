@@ -3,12 +3,13 @@
 #include <QDir>
 #include <QFile>
 #include <QTextStream>
+#include <QtXml/QDomDocument>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <fstream>
 #include "opencv2/opencv.hpp"
-#include <QtXml/QDomDocument>
+
 
 using namespace std;
 using namespace cv;
@@ -23,7 +24,7 @@ private:
 
 
 public:
-    int SetFrameMessage(int frame_counter, int objnum, QStringList str, QString quality, QStringList language, QString scene);
+    int SetFrameMessage(int frame_counter, int quadNum, QStringList str, QString quality, QStringList language, QString scene);
     void VideoFinalInfInput(QString name);
     void InitFrameMessage();
     void ReadFile(QString name);

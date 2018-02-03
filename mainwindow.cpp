@@ -10,7 +10,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     flag = ui->radioButton->isChecked();
     qDebug()<<flag;
-
 }
 
 MainWindow::~MainWindow()
