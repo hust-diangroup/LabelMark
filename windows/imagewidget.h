@@ -44,7 +44,7 @@ public:
     QStringList str;
 
     //视频文件操作
-    int SetFrameMessage(int frame_counter, int quadNum, QStringList str, QString quality, QStringList language, QString scene);
+    int SetFrameMessage(int frame_counter, int quadNum);
     void VideoFinalInfInput(int counter, QString name);
     void InitFrameMessage();
     void ReadXmlFile(QString name);

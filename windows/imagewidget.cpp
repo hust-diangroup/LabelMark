@@ -95,12 +95,14 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
     //m_showWidget.showMaximized();
 
     int counter = m_listWidget->row(item);
+    int framecounter = 0;
 
 //    QTextCodec *code = QTextCodec::codecForName("gbk");
 //    std::string namestr = code->fromUnicode(m_strPath + "\\" + m_imgList.at(counter)).data();
 //    QString name = QString::fromStdString(namestr);
     QString name = m_strPath + "\\" + m_imgList.at(counter);
-
+    QString name_withoutsuffix = name;
+    name_withoutsuffix.truncate(name_withoutsuffix.lastIndexOf("."));
 
     VideoCapture capture(name.toLocal8Bit().toStdString());
     capture >> img_original;
@@ -110,10 +112,10 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
     InitFrameMessage();
 
     if(flag){
-        namedWindow("Picture");
+        namedWindow("Picture", 0);
         img_original = imread(name.toLocal8Bit().toStdString());
         img_original.copyTo(img_drawing);
-        int result = ReadPicQuad(name, &counter);
+        int result = ReadPicQuad(name_withoutsuffix, &counter);
         if ( !result )
         {
             ClearAllVariable();
@@ -124,8 +126,8 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
         setMouseCallback("Picture", onMouse, 0);
     }else{
 //        fileout.ReadFile(name);
-        ReadXmlFile(name);
-        namedWindow("Video");
+        ReadXmlFile(name_withoutsuffix);
+        namedWindow("Video", 0);
         img_original.copyTo(img_drawing);
 //        QObject::connect(&fileout,SIGNAL(senddata(QString)),this,SLOT(receiveDataSave(QString)));
 //        fileout.ReadFramequad(img_drawing);
@@ -145,10 +147,10 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
             if (quadNum)
             {
                 if (flag){
-                    PicInfInput(name, quadNum);
+                    PicInfInput(name_withoutsuffix, quadNum);
                 }
                 else{
-                    SetFrameMessage(counter, quadNum, ImageWidget::str, ImageWidget::quality, ImageWidget::language, ImageWidget::scene);
+                    SetFrameMessage(framecounter, quadNum);
                 }
             }
             ClearAllVariable();
@@ -156,7 +158,7 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
                 destroyWindow("Picture");
             }else{
 //                fileout.VideoFinalInfInput(name);
-                VideoFinalInfInput(counter,name);
+                VideoFinalInfInput(framecounter,name_withoutsuffix);
                 destroyWindow("Video");
             }
 
@@ -174,7 +176,7 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
 
             if(flag)
             {
-                if(!PicInfInput(name, quadNum))//write the pic
+                if(!PicInfInput(name_withoutsuffix, quadNum))//write the pic
                 {
                     cout << "Please check it again!" << endl;
                     break;
@@ -182,13 +184,14 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
             }
             else
             {
-               if(!SetFrameMessage(counter, quadNum, ImageWidget::str, ImageWidget::quality, ImageWidget::language, ImageWidget::scene))//write the xml
+               if(!SetFrameMessage(framecounter, quadNum))//write the xml
                {
                    cout << "Please check it again!" << endl;
                    break;
                }
             }
             ++counter;
+            ++framecounter;
             qDebug() << counter;
             ClearAllVariable();
             if(flag){
@@ -197,9 +200,11 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
                     return;
                 }
                 name = m_strPath + "\\" + m_imgList.at(counter);
+                name_withoutsuffix = name;
+                name_withoutsuffix.truncate(name_withoutsuffix.lastIndexOf("."));
                 img_original = imread(name.toLocal8Bit().toStdString());
                 img_original.copyTo(img_drawing);
-                int result = ReadPicQuad(name, &counter);
+                int result = ReadPicQuad(name_withoutsuffix, &counter);
                 if ( !result )
                 {
                     ClearAllVariable();
@@ -220,7 +225,7 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
                     destroyWindow("Picture");
                 }else{
 //                    fileout.VideoFinalInfInput(name);
-                    VideoFinalInfInput(counter, name);
+                    VideoFinalInfInput(framecounter, name_withoutsuffix);
                     destroyWindow("Video");
                 }
                 return;
@@ -293,9 +298,9 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
 void ImageWidget::receiveDataSave(QString data){
     QStringList datalist = data.split(',');
     str << datalist[0];
-    quality = "low";
-    language << datalist[1];
-    scene = datalist[2];
+    scene = datalist[1];
+    language << datalist[2];
+    quality = datalist[3];
     QString showlist;
     if (flag)
     {
@@ -383,7 +388,7 @@ void onMouse(int event, int x, int y, int, void*)
     return;
 }
 
-int ImageWidget::SetFrameMessage(int frame_counter, int quadNum, QStringList str, QString quality, QStringList language, QString scene)
+int ImageWidget::SetFrameMessage(int frame_counter, int quadNum)
 {
     //set the message from quad and str to Frame
     if (str.count() != quadNum)
@@ -437,9 +442,9 @@ void ImageWidget::VideoFinalInfInput(int counter, QString name)
                     + ObjectNode.toElement().attributeNode("Scene").value();
             QStringList datashowlist = datashow.split(',');
             str << datashowlist[0];
-            quality = "low";
             language << datashowlist[1];
             scene = datashowlist[2];
+            quality = datashowlist[3];
 
             QDomNode PointNode = ObjectNode.firstChild();
             for (int i=0; i<4 ;i++)
@@ -452,7 +457,7 @@ void ImageWidget::VideoFinalInfInput(int counter, QString name)
             quadNum++;
             ObjectNode = ObjectNode.nextSibling();
         }
-        SetFrameMessage(counter, quadNum, ImageWidget::str, ImageWidget::quality, ImageWidget::language, ImageWidget::scene);
+        SetFrameMessage(counter, quadNum);
         TmpFileFrameNode = TmpFileFrameNode.nextSibling();
     }
 
@@ -497,24 +502,25 @@ void ImageWidget::ReadXmlFile(QString name)
 
 void ImageWidget::ReadFramequad(Mat img_drawing)
 {
+    QString showlist= "打标内容:";
+    this->textEdit->setText(showlist);
     //Read the next Frame
     if ( !TmpFileFrameNode.isNull() )
     {
-        QString showlist= "打标内容:";
-        this->textEdit->setText(showlist);
         QDomNode ObjectNode = TmpFileFrameNode.firstChild();
         while ( !ObjectNode.isNull() )
         {
             QString datashow = ObjectNode.toElement().attributeNode("Transcription").value()+","
                     + ObjectNode.toElement().attributeNode("Language").value()+","
-                    + ObjectNode.toElement().attributeNode("Scene").value();
+                    + ObjectNode.toElement().attributeNode("Scene").value()+","
+                    + ObjectNode.toElement().attributeNode("Quality").value();
             showlist = this->textEdit->toPlainText() + '\n' + datashow;
             this->textEdit->setText(showlist);     //获取传递过来的数据
             QStringList datashowlist = datashow.split(',');
             str << datashowlist[0];
-            quality = "low";
             language << datashowlist[1];
             scene = datashowlist[2];
+            quality = datashowlist[3];
 
             QDomNode PointNode = ObjectNode.firstChild();
             for (int i=0; i<4 ;i++)
@@ -546,7 +552,7 @@ int ImageWidget::PicInfInput(QString name, int quadNum)
         cout << "please ensure the number of Transcriptions is equal to the number of the quad"  << endl;
         return 0;
     }
-    QFile file(name+".txt");   //open file for stream
+    QFile file(name+".txt");
     if(!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
         return 0;
     QTextStream stream(&file);
@@ -558,11 +564,14 @@ int ImageWidget::PicInfInput(QString name, int quadNum)
                << quad[i][3].x << "," << quad[i][3].y << "," << str[i] << "\r\n" ;
     }
     stream << "row=" << img_drawing.rows << "," << "columns=" << img_drawing.cols;
+    file.close();
     return 1;
 }
 
 int ImageWidget::ReadPicQuad(QString name, int* pcounter)
 {
+    QString showlist= "打标内容:";
+    this->textEdit->setText(showlist);
     QFileInfo FI(name+".txt");
     if (FI.isFile())
     {
@@ -580,8 +589,6 @@ int ImageWidget::ReadPicQuad(QString name, int* pcounter)
             line = in.readLine();
         }
         file.close();
-        QString showlist= "打标内容:";
-        this->textEdit->setText(showlist);
         for(int i=0; i<TxtStr.count()-1 ; i++)   //Get the n-1 lines. The nth line is the pixel statistic
         {
             QString tmpstr = TxtStr[i];
