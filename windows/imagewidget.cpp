@@ -65,7 +65,7 @@ void ImageWidget::init() {
 
     // 创建单元项
     for (int i = 0; i<m_imgList.count(); ++i) {
-        QPixmap pixmap(m_strPath + "\\" + m_imgList.at(i));
+        QPixmap pixmap(m_strPath + "/" + m_imgList.at(i));
         QListWidgetItem *listWidgetItem = new QListWidgetItem(QIcon(pixmap.scaled(IMAGE_SIZE)), m_imgList.at(i));
         listWidgetItem->setSizeHint(ITEM_SIZE);
         m_listWidget->insertItem(i, listWidgetItem);
@@ -100,7 +100,8 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
 //    QTextCodec *code = QTextCodec::codecForName("gbk");
 //    std::string namestr = code->fromUnicode(m_strPath + "\\" + m_imgList.at(counter)).data();
 //    QString name = QString::fromStdString(namestr);
-    QString name = m_strPath + "\\" + m_imgList.at(counter);
+    QString name = m_strPath + "/" + m_imgList.at(counter);
+    qDebug() << name;
     QString name_withoutsuffix = name;
     name_withoutsuffix.truncate(name_withoutsuffix.lastIndexOf("."));
 
@@ -199,7 +200,7 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
                     destroyWindow("Picture");
                     return;
                 }
-                name = m_strPath + "\\" + m_imgList.at(counter);
+                name = m_strPath + "/" + m_imgList.at(counter);
                 name_withoutsuffix = name;
                 name_withoutsuffix.truncate(name_withoutsuffix.lastIndexOf("."));
                 img_original = imread(name.toLocal8Bit().toStdString());
@@ -649,7 +650,7 @@ int ImageWidget::File_Error_Warning(QString name, int *pcounter)
             return 0;
         }
         else{
-            name = m_strPath + "\\" + m_imgList.at(*pcounter);
+            name = m_strPath + "/" + m_imgList.at(*pcounter);
             img_original = imread(name.toLocal8Bit().toStdString());
             img_original.copyTo(img_drawing);
             int result = ReadPicQuad(name, pcounter);
