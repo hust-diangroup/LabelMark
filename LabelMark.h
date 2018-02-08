@@ -34,6 +34,7 @@ private slots:
     void on_languageLine_returnPressed();
     void on_sceneLine_returnPressed();
     void on_markLine_returnPressed();
+    void on_qualityLine_returnPressed();
 };
 
 #endif // LabelMark_H

@@ -20,10 +20,7 @@ LabelMark::~LabelMark()
 
 void LabelMark::on_languageLine_returnPressed()
 {
-    str = ui->markLine->text() + "," + ui->sceneLine->text() + "," + ui->languageLine->text();
-    emit sendData(str);
-    qDebug("test<<<%s", qPrintable( str ) );
-    this->close();
+    ui->qualityLine->setFocus();
 }
 
 void LabelMark::on_sceneLine_returnPressed()
@@ -34,4 +31,12 @@ void LabelMark::on_sceneLine_returnPressed()
 void LabelMark::on_markLine_returnPressed()
 {
     ui->sceneLine->setFocus();
+}
+
+void LabelMark::on_qualityLine_returnPressed()
+{
+    str = ui->markLine->text() + "," + ui->sceneLine->text() + "," + ui->languageLine->text() + ',' + ui->qualityLine->text();
+    emit sendData(str);
+    qDebug("test<<<%s", qPrintable( str ) );
+    this->close();
 }

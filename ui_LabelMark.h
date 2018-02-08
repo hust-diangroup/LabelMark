@@ -26,15 +26,17 @@ public:
     QLineEdit *markLine;
     QLineEdit *sceneLine;
     QLineEdit *languageLine;
-    QLabel *label;
-    QLabel *label_2;
-    QLabel *label_3;
+    QLineEdit *qualityLine;
+    QLabel *label_4;
+    QLabel *label_5;
+    QLabel *label_6;
+    QLabel *label_7;
 
     void setupUi(QWidget *LabelMark)
     {
         if (LabelMark->objectName().isEmpty())
             LabelMark->setObjectName(QStringLiteral("LabelMark"));
-        LabelMark->resize(339, 128);
+        LabelMark->resize(339, 172);
         markLine = new QLineEdit(LabelMark);
         markLine->setObjectName(QStringLiteral("markLine"));
         markLine->setGeometry(QRect(70, 10, 241, 21));
@@ -44,15 +46,21 @@ public:
         languageLine = new QLineEdit(LabelMark);
         languageLine->setObjectName(QStringLiteral("languageLine"));
         languageLine->setGeometry(QRect(70, 90, 241, 20));
-        label = new QLabel(LabelMark);
-        label->setObjectName(QStringLiteral("label"));
-        label->setGeometry(QRect(30, 90, 31, 21));
-        label_2 = new QLabel(LabelMark);
-        label_2->setObjectName(QStringLiteral("label_2"));
-        label_2->setGeometry(QRect(30, 50, 31, 21));
-        label_3 = new QLabel(LabelMark);
-        label_3->setObjectName(QStringLiteral("label_3"));
-        label_3->setGeometry(QRect(30, 10, 31, 21));
+        qualityLine = new QLineEdit(LabelMark);
+        qualityLine->setObjectName(QStringLiteral("qualityLine"));
+        qualityLine->setGeometry(QRect(70, 130, 241, 20));
+        label_4 = new QLabel(LabelMark);
+        label_4->setObjectName(QStringLiteral("label_4"));
+        label_4->setGeometry(QRect(20, 10, 31, 21));
+        label_5 = new QLabel(LabelMark);
+        label_5->setObjectName(QStringLiteral("label_5"));
+        label_5->setGeometry(QRect(20, 50, 31, 21));
+        label_6 = new QLabel(LabelMark);
+        label_6->setObjectName(QStringLiteral("label_6"));
+        label_6->setGeometry(QRect(20, 90, 31, 21));
+        label_7 = new QLabel(LabelMark);
+        label_7->setObjectName(QStringLiteral("label_7"));
+        label_7->setGeometry(QRect(20, 130, 31, 21));
 
         retranslateUi(LabelMark);
 
@@ -63,9 +71,10 @@ public:
     {
         LabelMark->setWindowTitle(QApplication::translate("LabelMark", "Form", Q_NULLPTR));
         markLine->setText(QString());
-        label->setText(QApplication::translate("LabelMark", "\350\257\255\350\250\200", Q_NULLPTR));
-        label_2->setText(QApplication::translate("LabelMark", "\345\234\272\346\231\257", Q_NULLPTR));
-        label_3->setText(QApplication::translate("LabelMark", "\346\240\207\346\263\250", Q_NULLPTR));
+        label_4->setText(QApplication::translate("LabelMark", "\346\240\207\346\263\250", Q_NULLPTR));
+        label_5->setText(QApplication::translate("LabelMark", "\345\234\272\346\231\257", Q_NULLPTR));
+        label_6->setText(QApplication::translate("LabelMark", "\350\257\255\350\250\200", Q_NULLPTR));
+        label_7->setText(QApplication::translate("LabelMark", "\350\264\250\351\207\217", Q_NULLPTR));
     } // retranslateUi
 
 };

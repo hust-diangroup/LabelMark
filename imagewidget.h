@@ -16,6 +16,10 @@
 #include "LabelMark.h"
 //#include "FileOperation.h"
 #include <QtWidgets/QTextEdit>
+#include <QMessageBox>
+
+
+
 
 using namespace std;
 using namespace cv;
@@ -40,7 +44,7 @@ public:
     QStringList str;
 
     //视频文件操作
-    int SetFrameMessage(int frame_counter, int quadNum, QStringList str, QString quality, QStringList language, QString scene);
+    int SetFrameMessage(int frame_counter, int quadNum);
     void VideoFinalInfInput(int counter, QString name);
     void InitFrameMessage();
     void ReadXmlFile(QString name);
@@ -48,10 +52,15 @@ public:
 
     //图片文件操作
     int PicInfInput(QString name, int objnum);
-    void ReadPicQuad(QString name);
+    int ReadPicQuad(QString name, int* pcounter);
+    int TxtlineToPointandtrans(int counter, QStringList PointandTrans);
+
+    //提示框设计
+    int File_Error_Warning(QString name, int* pcounter);   //读取txt文件错误消息框,可以自行选择重新打标或者直接跳到下一张
 
 private:
     void init();    // 初始化
+    void ClearAllVariable();  //清除当前帧或者图片所有点以及标签
 
 private slots:
     void slot_itemClicked(QListWidgetItem*);
@@ -72,12 +81,14 @@ private:
     //图片文件变量
 
     QStringList TxtStr;
+    QString Transcrption;
 signals:
     void sendToShow(QString);
 };
 
 
 void drawQuadri (Point * quad);
+void drawAllQuadri ();
 int isempty(Point * quad);
 void onMouse(int event, int x, int y, int, void*);
 

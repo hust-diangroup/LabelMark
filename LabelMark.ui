@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>339</width>
-    <height>128</height>
+    <height>172</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,23 +46,33 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLineEdit" name="qualityLine">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>90</y>
+     <x>70</x>
+     <y>130</y>
+     <width>241</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>10</y>
      <width>31</width>
      <height>21</height>
     </rect>
    </property>
    <property name="text">
-    <string>语言</string>
+    <string>标注</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
+  <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>20</x>
      <y>50</y>
      <width>31</width>
      <height>21</height>
@@ -72,17 +82,30 @@
     <string>场景</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
+  <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>10</y>
+     <x>20</x>
+     <y>90</y>
      <width>31</width>
      <height>21</height>
     </rect>
    </property>
    <property name="text">
-    <string>标注</string>
+    <string>语言</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>130</y>
+     <width>31</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>质量</string>
    </property>
   </widget>
  </widget>
