@@ -14,7 +14,7 @@
 - 按“N”进入下一张（下一帧），并保存当前内容（当前目录下同名文件.txt中）
 - 按“C”清除当前标注框
 - 按“Z”撤销操作   
-<img src="output.gif" width = "800" align=center />
+<img src="images/show.gif" width = "800" align=center />
 
 ## 注意事项
 - 不允许空标签出现，需要输入内容不然无法进入到下一张
