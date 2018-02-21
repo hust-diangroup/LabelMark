@@ -9,7 +9,8 @@ A Label Mark tool using for deep learning
 - Push "N" to move to the next photo
 - The Label and point is saved in the "photoname.txt"
      
-<img src="images/show.gif" width = "800" align=center />
+<img src="images/show.gif" width = "800" align=center />  
+
 ## Bulid Notice
 - Based on Qt5.8
 - You need to replace you directory of Opencv in .pro and you can build the code
