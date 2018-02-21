@@ -1,4 +1,5 @@
-# LabelMark
+# LabelMark  
+*Read this in other languages: [English](README.md), [简体中文](README-zh.md).*
 A Label Mark tool using for deep learning   
 ## Photo Mark  
 - Select floder and read all the files
