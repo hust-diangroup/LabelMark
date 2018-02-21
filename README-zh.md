@@ -1,4 +1,5 @@
-# LabelMark 工具
+# LabelMark 工具  
+*Read this in other languages: [English](README.md), [简体中文](README-zh.md).*  
 - 支持图像和视频打标功能
 - 输出格式参照ICDAR2015数据集格式
 - 简单操作实现对图片和视频进行标注
