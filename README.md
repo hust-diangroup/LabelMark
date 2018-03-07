@@ -7,7 +7,8 @@ A Label Mark tool using for deep learning or machine learning
 - Choose 4 points to make a lable
 - Push "X" to add a label
 - Push "N" to move to the next photo
-- The Label and point is saved in the "photoname.txt"
+- The label and point is saved in the "photoname.txt"
+- The point is combined in order of your click
      
 <img src="images/show.gif" width = "800" align=center />  
 
