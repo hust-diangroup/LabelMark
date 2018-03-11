@@ -57,7 +57,7 @@ public:
         scrollArea->setWidget(scrollAreaWidgetContents);
         openDir = new QPushButton(centralWidget);
         openDir->setObjectName(QStringLiteral("openDir"));
-        openDir->setGeometry(QRect(270, 50, 61, 31));
+        openDir->setGeometry(QRect(270, 50, 101, 31));
         dirName = new QTextEdit(centralWidget);
         dirName->setObjectName(QStringLiteral("dirName"));
         dirName->setGeometry(QRect(30, 50, 231, 31));
@@ -71,7 +71,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 539, 23));
+        menuBar->setGeometry(QRect(0, 0, 539, 26));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));

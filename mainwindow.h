@@ -54,8 +54,13 @@ private slots:
 
     void on_openDir_clicked();
 
+    void on_radioButton_2_toggled(bool checked);
+
+    void on_radioButton_toggled(bool checked);
+
 private:
     Ui::MainWindow *ui;
+    bool start = false;
 };
 
 

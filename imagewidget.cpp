@@ -101,6 +101,11 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
 //    std::string namestr = code->fromUnicode(m_strPath + "\\" + m_imgList.at(counter)).data();
 //    QString name = QString::fromStdString(namestr);
     QString name = m_strPath + "/" + m_imgList.at(counter);
+    QFileInfo file(name);
+    if(!file.isFile())
+    {
+        return;
+    }
     qDebug() << name;
     QString name_withoutsuffix = name;
     name_withoutsuffix.truncate(name_withoutsuffix.lastIndexOf("."));

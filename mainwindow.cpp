@@ -62,7 +62,37 @@ void MainWindow::on_openDir_clicked()
     QDir dir(dirname);//如果不加地址，则就在当前目录下遍历
     ui->dirName->setText(dirname);
     flag = ui->radioButton->isChecked();
+    start = true;
     ImageWidget *w = new ImageWidget(ui->scrollArea, flag, dirname);
     connect(w, SIGNAL(sendToShow(QString)), this, SLOT(receiveData(QString)));
     ui->scrollArea->setWidget(w);
+}
+
+void MainWindow::on_radioButton_2_toggled(bool checked)
+{
+    if (ui->radioButton_2->isChecked() && start)
+       {
+
+           QDir dir(dirname);//如果不加地址，则就在当前目录下遍历
+           ui->dirName->setText(dirname);
+           flag = ui->radioButton->isChecked();
+           ImageWidget *w = new ImageWidget(ui->scrollArea, flag, dirname);
+           connect(w, SIGNAL(sendToShow(QString)), this, SLOT(receiveData(QString)));
+           ui->scrollArea->setWidget(w);
+       }
+
+}
+
+void MainWindow::on_radioButton_toggled(bool checked)
+{
+    if (ui->radioButton->isChecked() && start)
+       {
+
+           QDir dir(dirname);//如果不加地址，则就在当前目录下遍历
+           ui->dirName->setText(dirname);
+           flag = ui->radioButton->isChecked();
+           ImageWidget *w = new ImageWidget(ui->scrollArea, flag, dirname);
+           connect(w, SIGNAL(sendToShow(QString)), this, SLOT(receiveData(QString)));
+           ui->scrollArea->setWidget(w);
+       }
 }
