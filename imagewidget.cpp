@@ -8,10 +8,17 @@
 #include <QDebug>
 #include <QTextCodec>
 
+#define GREEN 255
+
+
 Mat img_original, img_drawing;
 Point quad[100][4];
 int pointNum = 0;
 int quadNum = 0;
+//int openwindow = 0;
+//int maxwindow = 0;
+int currentquad = -1;
+int currentcontext = currentquad;
 bool flags;
 ImageWidget::ImageWidget(QWidget *parent, bool flag, QString dirname)
     : QWidget(parent),
@@ -93,7 +100,10 @@ void ImageWidget::init() {
 void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
    // m_showWidget.setPixmap(QPixmap(m_strPath + "\\" + m_imgList.at(m_listWidget->row(item))));
     //m_showWidget.showMaximized();
-
+//    openwindow++;
+//    maxwindow = openwindow;
+    ClearAllVariable();
+    int xxx;
     int counter = m_listWidget->row(item);
     int framecounter = 0;
 
@@ -121,13 +131,15 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
         namedWindow("Picture", 0);
         img_original = imread(name.toLocal8Bit().toStdString());
         img_original.copyTo(img_drawing);
-        int result = ReadPicQuad(name_withoutsuffix, &counter);
+        int result = ReadPicQuad(name_withoutsuffix, &xxx);
         if ( !result )
         {
             ClearAllVariable();
             destroyWindow("Picture");
             return;
         }
+//        destroyWindow("Picture");
+//        namedWindow("Picture", 0);
         imshow("Picture",img_drawing);
         setMouseCallback("Picture", onMouse, 0);
     }else{
@@ -146,10 +158,15 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
     while (1){
 
         int c = waitKey(0);
+        if (openwindow != maxwindow)
+        {
+            return;
+        }
         if ((c & 255) == 27)
         {
             cout << "Exiting ...\n";
-            qDebug() << quadNum;
+//            qDebug() << quadNum;
+//            qDebug() << c;
             if (quadNum)
             {
                 if (flag){
@@ -161,6 +178,7 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
             }
             ClearAllVariable();
             if(flag){
+//                openwindow--;
                 destroyWindow("Picture");
             }else{
 //                fileout.VideoFinalInfInput(name);
@@ -170,6 +188,7 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
 
             return;
         }
+      //  qDebug() << c;
         switch ((char)c)
         {
         case 'n':
@@ -198,10 +217,15 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
             }
             ++counter;
             ++framecounter;
+            qDebug()<<"counter:";
             qDebug() << counter;
+            qDebug()<<"counter:";
+            qDebug() << m_imgList.count();
             ClearAllVariable();
             if(flag){
                 if(m_imgList.count() == counter){
+                    qDebug() << "destroy!";
+//                    openwindow--;
                     destroyWindow("Picture");
                     return;
                 }
@@ -210,7 +234,7 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
                 name_withoutsuffix.truncate(name_withoutsuffix.lastIndexOf("."));
                 img_original = imread(name.toLocal8Bit().toStdString());
                 img_original.copyTo(img_drawing);
-                int result = ReadPicQuad(name_withoutsuffix, &counter);
+                int result = ReadPicQuad(name_withoutsuffix, &xxx);
                 if ( !result )
                 {
                     ClearAllVariable();
@@ -257,15 +281,27 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
             break;
         case 'c':
             //clear the last quad array
-            if (quadNum > 0 && pointNum == 0)       //clear the last quad
+            if (quadNum > 0 && pointNum == 0)       //clear the current quad
             {
+                for(int tempquad = currentquad; tempquad < quadNum -1; tempquad++)  //use the next quad to replace the tempquad
+                {
+                    for(int pointSn = 0; pointSn < 4; pointSn++)
+                    {
+                        quad[tempquad][pointSn].x = quad[tempquad + 1][pointSn].x;
+                        quad[tempquad][pointSn].y = quad[tempquad + 1][pointSn].y;
+                    }
+                }
                 memset(quad[--quadNum],0,4*sizeof(Point));
                 while ( quadNum < str.count())
                 {
-                    str.removeLast();
+                    str.removeAt(currentquad);
                     QStringList showlist = this->textEdit->toPlainText().split("\n");   //remove the last label from the content shown on ui
-                    showlist.removeLast();
+                    showlist.removeAt(currentquad + 1);
                     this->textEdit->setText(showlist.join('\n'));
+                }
+                if(currentquad == quadNum)
+                {
+                    --currentquad;
                 }
                 img_original.copyTo(img_drawing);
                 drawAllQuadri ();    //redraw the points and the lines on the image.
@@ -278,12 +314,26 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
                 pointNum = 0;
             }
             break;
+        case 61://↑，change the value of currentquad to the former one
+            if(currentquad > 0 && quadNum > 0)
+            {
+                currentquad--;
+                drawAllQuadri();
+            }
+            break;
+        case 45://↓，change the value of currentquad to the next one
+            if(currentquad < quadNum - 1 && quadNum > 0)
+            {
+                currentquad++;
+                drawAllQuadri();
+            }
+            break;
         case 'x':
             if ( str.count() < quadNum )
             {
-            LabelMark *widget = new LabelMark;
-            widget->show();
-            connect(widget, SIGNAL(sendData(QString)), this, SLOT(receiveDataSave(QString)));
+                LabelMark *widget = new LabelMark;
+                widget->show();
+                connect(widget, SIGNAL(sendData(QString)), this, SLOT(receiveDataSave(QString)));
             }
             else
             {
@@ -293,6 +343,8 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
         }
 
         if(flag){
+//            destroyWindow("Picture");
+//            namedWindow("Picture", 0);
             imshow("Picture", img_drawing);
         }else{
             imshow("Video", img_drawing);
@@ -324,10 +376,10 @@ void ImageWidget::receiveDataSave(QString data){
 }
 
 
-void drawQuadri (Point * quadPoint) {
+void drawQuadri (Point * quadPoint, int blue, int green, int red) {
     for(int i = 0; i < 4; i++)
     {
-        line(img_drawing,quadPoint[i],quadPoint[(i+1)%4],Scalar(0,255,0),3,8,0);
+        line(img_drawing,quadPoint[i],quadPoint[(i+1)%4],Scalar(blue, green, red),3,8,0);
     }
 }
 
@@ -341,7 +393,15 @@ void drawAllQuadri ()
         {
             circle(img_drawing,cvPoint(quad[i][j].x,quad[i][j].y),1,Scalar(0, 255, 0),2,8,0);
         }
-        drawQuadri(quad[i]);
+        drawQuadri(quad[i], 0, 255, 0);
+    }
+    if (quadNum > 0)
+    {
+        for(int j = 0 ; j < 4; j++)
+        {
+            circle(img_drawing,cvPoint(quad[currentquad][j].x,quad[currentquad][j].y),1,Scalar(0, 0, 255),2,8,0);
+        }
+        drawQuadri(quad[currentquad], 0, 0, 255);
     }
 }
 
@@ -373,20 +433,23 @@ void onMouse(int event, int x, int y, int, void*)
     case CV_EVENT_LBUTTONUP:
         //finish drawing the rect (use color green for finish)
 
-        circle(img_drawing,cvPoint(x,y),1,Scalar(0, 255, 0),2,8,0);
+        circle(img_drawing,cvPoint(x,y),1,Scalar(0, 0, 255),2,8,0);
 
         if(pointNum == 4)
         {
             pointNum = 0;
 
             cout<<"draw quadri line"<<endl;
-            drawQuadri(quad[quadNum++]);
-
+            quadNum++;
+            currentquad = quadNum - 1;
+            drawAllQuadri ();
         }
 
         break;
     }
     if (flags){
+//        destroyWindow("Picture");
+//        namedWindow("Picture", 0);
         imshow("Picture", img_drawing);
     }else{
         imshow("Video", img_drawing);
@@ -539,14 +602,8 @@ void ImageWidget::ReadFramequad(Mat img_drawing)
             quadNum++;
             ObjectNode = ObjectNode.nextSibling();
         }
-        for (int i = 0 ; i < quadNum ; i++)   //redraw the rest of the quads
-        {
-            for(int j = 0 ; j < 4; j++)
-            {
-                circle(img_drawing,cvPoint(quad[i][j].x,quad[i][j].y),1,Scalar(0, 255, 0),2,8,0);
-            }
-            drawQuadri(quad[i]);
-        }
+        currentquad = quadNum - 1;
+        drawAllQuadri();
     }
     TmpFileFrameNode = TmpFileFrameNode.nextSibling();
 }
@@ -624,6 +681,7 @@ int ImageWidget::ReadPicQuad(QString name, int* pcounter)
             quadNum++;
         }
         TxtStr.clear();
+        currentquad = quadNum - 1;
         drawAllQuadri();
     }
     return 1;
@@ -634,6 +692,7 @@ void ImageWidget::ClearAllVariable()
     memset(quad,0,400*sizeof(Point));         //clear all the variables
     quadNum = 0;
     pointNum = 0;
+    currentquad = -1;
     str.clear();
     quality.clear();
     language.clear();
