@@ -140,6 +140,8 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
         }
 //        destroyWindow("Picture");
 //        namedWindow("Picture", 0);
+        if(img_drawing.empty())
+            return;
         imshow("Picture",img_drawing);
         setMouseCallback("Picture", onMouse, 0);
     }else{
@@ -150,6 +152,8 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
 //        QObject::connect(&fileout,SIGNAL(senddata(QString)),this,SLOT(receiveDataSave(QString)));
 //        fileout.ReadFramequad(img_drawing);
         ReadFramequad(img_drawing);
+        if(img_drawing.empty())
+            return;
         imshow("Video", img_drawing);
         setMouseCallback("Video", onMouse, 0);
     }
@@ -158,10 +162,7 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
     while (1){
 
         int c = waitKey(0);
-        if (openwindow != maxwindow)
-        {
-            return;
-        }
+
         if ((c & 255) == 27)
         {
             cout << "Exiting ...\n";
@@ -227,6 +228,8 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
                     qDebug() << "destroy!";
 //                    openwindow--;
                     destroyWindow("Picture");
+                    img_drawing.release();
+
                     return;
                 }
                 name = m_strPath + "/" + m_imgList.at(counter);
@@ -238,7 +241,9 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
                 if ( !result )
                 {
                     ClearAllVariable();
+
                     destroyWindow("Picture");
+
                     return;
                 }
             }else{
@@ -345,8 +350,12 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
         if(flag){
 //            destroyWindow("Picture");
 //            namedWindow("Picture", 0);
+            if(img_drawing.empty())
+                return;
             imshow("Picture", img_drawing);
         }else{
+            if(img_drawing.empty())
+                return;
             imshow("Video", img_drawing);
         }
 
@@ -450,8 +459,13 @@ void onMouse(int event, int x, int y, int, void*)
     if (flags){
 //        destroyWindow("Picture");
 //        namedWindow("Picture", 0);
+        if(img_drawing.empty())
+            return;
         imshow("Picture", img_drawing);
+
     }else{
+        if(img_drawing.empty())
+            return;
         imshow("Video", img_drawing);
     }
     return;
