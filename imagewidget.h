@@ -37,14 +37,16 @@ public:
     bool flag;
 
     QString dirname;
-    QString quality;
+    QStringList quality;
     QStringList language;
-    QString scene;
-    QString showdata;
+    QStringList scene;
+    QString show;
+    QString showlist;
     QStringList str;
 
     //视频文件操作
     int SetFrameMessage(int frame_counter, int quadNum);
+    void showallcontext();
     void VideoFinalInfInput(int counter, QString name);
     void InitFrameMessage();
     void ReadXmlFile(QString name);
@@ -82,13 +84,16 @@ private:
 
     QStringList TxtStr;
     QString Transcrption;
+    QString languagetranscription;
+    QString qualitytranscription;
+    QString scenetranscription;
 signals:
     void sendToShow(QString);
 };
 
 
-void drawQuadri (Point * quad);
-void drawAllQuadri ();
+void drawQuadri (Point * quad, int blue, int green, int red);
+void drawAllQuadri (int currentquad_color, QStringList str);
 int isempty(Point * quad);
 void onMouse(int event, int x, int y, int, void*);
 
