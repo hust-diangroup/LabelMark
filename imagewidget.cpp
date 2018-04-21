@@ -8,20 +8,20 @@
 #include <QDebug>
 #include <QTextCodec>
 
-
-Mat img_original, img_drawing;
-Point quad[100][4];
-int pointNum = 0;
-int quadNum = 0;
+int index[3];
+static Mat img_original, img_drawing;
+static Point quad[100][4];
+static int pointNum = 0;
+static int quadNum = 0;
 //int openwindow = 0;
 //int maxwindow = 0;
-QStringList *pstring = NULL;
-QStringList *pscene = NULL;
-QStringList *planguage = NULL;
-QStringList *pquality = NULL;
-int currentquad = -1;
-int currentcontext = currentquad;
-bool flags;
+static QStringList *pstring = NULL;
+static QStringList *pscene = NULL;
+static QStringList *planguage = NULL;
+static QStringList *pquality = NULL;
+static int currentquad = -1;
+static int currentcontext = currentquad;
+static bool flags;
 ImageWidget::ImageWidget(QWidget *parent, bool flag, QString dirname)
     : QWidget(parent),
       flag(flag),

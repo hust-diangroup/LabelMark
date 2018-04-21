@@ -26,9 +26,12 @@ FORMS    += mainwindow.ui \
     LabelMark.ui \
     imagewidget.ui
 
-INCLUDEPATH += C:\Users\Angelo\Desktop\install\include
-INCLUDEPATH+=C:\Users\Angelo\Desktop\install\include\opencv
-INCLUDEPATH+=C:\Users\Angelo\Desktop\install\include\opencv2
+INCLUDEPATH += D:\opencv\opencv\build\include \
+                D:\opencv\opencv\build\include\opencv \
+                D:\opencv\opencv\build\include\opencv2
 
-LIBS += -L C:\Users\Angelo\Desktop\install\x86\mingw\bin\libopencv_*.dll
-LIBS += -L C:\Users\Angelo\Desktop\install\x86\mingw\lib\libopencv_*.a
+LIBS += D:\opencv_mingw\bin\libopencv_core330.dll \
+        D:\opencv_mingw\bin\libopencv_highgui330.dll \
+        D:\opencv_mingw\bin\libopencv_imgcodecs330.dll \
+        D:\opencv_mingw\bin\libopencv_imgproc330.dll \
+        D:\opencv_mingw\bin\libopencv_videoio330.dll

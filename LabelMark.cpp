@@ -1,12 +1,17 @@
 #include "LabelMark.h"
 #include "ui_LabelMark.h"
 
+
+extern int index[3];
 LabelMark::LabelMark(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::LabelMark)
 {
     ui->setupUi(this);
     this->setWindowTitle("LabelMark");
+    ui->comboBox->setCurrentIndex(index[0]);
+    ui->comboBox_2->setCurrentIndex(index[1]);
+    ui->comboBox_3->setCurrentIndex(index[2]);
     qDebug("hehe<<<%s", qPrintable( str ) );
 
 }
@@ -18,25 +23,18 @@ LabelMark::~LabelMark()
 }
 
 
-void LabelMark::on_languageLine_returnPressed()
-{
-    ui->qualityLine->setFocus();
-}
+void LabelMark::keyPressEvent(QKeyEvent * event){
 
-void LabelMark::on_sceneLine_returnPressed()
-{
-    ui->languageLine->setFocus();
-}
+    if ( event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return){
+        str = ui->markLine->text() + "," + ui->comboBox->currentText() + "," + ui->comboBox_2->currentText() + ',' + ui->comboBox_3->currentText();
+        index[0] = ui->comboBox->currentIndex();
+        index[1] = ui->comboBox_2->currentIndex();
+        index[2] = ui->comboBox_3->currentIndex();
+        emit sendData(str);
+        qDebug("test<<<%s", qPrintable( str ) );
+        this->close();
+    }
 
-void LabelMark::on_markLine_returnPressed()
-{
-    ui->sceneLine->setFocus();
-}
 
-void LabelMark::on_qualityLine_returnPressed()
-{
-    str = ui->markLine->text() + "," + ui->sceneLine->text() + "," + ui->languageLine->text() + ',' + ui->qualityLine->text();
-    emit sendData(str);
-    qDebug("test<<<%s", qPrintable( str ) );
-    this->close();
+
 }

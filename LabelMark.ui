@@ -26,36 +26,6 @@
     <string/>
    </property>
   </widget>
-  <widget class="QLineEdit" name="sceneLine">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>50</y>
-     <width>241</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="languageLine">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>90</y>
-     <width>241</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="qualityLine">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>130</y>
-     <width>241</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
@@ -107,6 +77,131 @@
    <property name="text">
     <string>质量</string>
    </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>50</y>
+     <width>171</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>机场火车站等站台</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>舞台</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>球场</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>乡村</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>寺庙教堂宫殿</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>餐厅食堂</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>咖啡厅酒吧</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>商场超市</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>售票处</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>博物馆</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>街道</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>教室</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>其它</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="comboBox_2">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>90</y>
+     <width>171</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>中文</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>English</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>维吾尔语</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="comboBox_3">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>130</y>
+     <width>171</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>高</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>中</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>低</string>
+    </property>
+   </item>
   </widget>
  </widget>
  <resources/>

@@ -31,7 +31,7 @@ public:
         ImageWidget->resize(532, 502);
         textEdit = new QTextEdit(ImageWidget);
         textEdit->setObjectName(QStringLiteral("textEdit"));
-         textEdit->setGeometry(QRect(280, 10, 151, 471));
+        textEdit->setGeometry(QRect(280, 10, 151, 471));
 
         retranslateUi(ImageWidget);
 
