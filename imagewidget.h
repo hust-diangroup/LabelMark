@@ -18,7 +18,12 @@
 #include <QtWidgets/QTextEdit>
 #include <QMessageBox>
 
+#include <QJsonDocument>
+#include <QJsonParseError>
 
+#include <QJsonObject>
+
+#include <QJsonArray>
 
 
 using namespace std;
@@ -59,7 +64,7 @@ public:
 
     //提示框设计
     int File_Error_Warning(QString name, int* pcounter);   //读取txt文件错误消息框,可以自行选择重新打标或者直接跳到下一张
-
+    bool JosnToPoint(QString name, Point *face_point); //读取Json文件
 private:
     void init();    // 初始化
     void ClearAllVariable();  //清除当前帧或者图片所有点以及标签

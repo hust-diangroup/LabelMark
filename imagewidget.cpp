@@ -13,6 +13,10 @@ static Mat img_original, img_drawing;
 static Point quad[100][4];
 static int pointNum = 0;
 static int quadNum = 0;
+static bool  drawFlag = 0;
+
+#define FOURPOINT 0
+#define RECTANGLE 1
 //int openwindow = 0;
 //int maxwindow = 0;
 static QStringList *pstring = NULL;
@@ -54,7 +58,7 @@ void ImageWidget::init() {
     dir.setFilter(QDir::Files | QDir::NoSymLinks);
     QStringList filters;
     if(flag){
-        filters << "*.png" << "*.jpg";
+        filters << "*.png" << "*.jpg" << "*.bmp";
     }else{
         filters << "*.avi"<<"*.mp4";//设置过滤类型                                       x
     }
@@ -112,6 +116,8 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
     pscene = &scene;
     planguage = &language;
     pquality = &quality;
+    Point face_point[110];
+
 
 //    QTextCodec *code = QTextCodec::codecForName("gbk");
 //    std::string namestr = code->fromUnicode(m_strPath + "\\" + m_imgList.at(counter)).data();
@@ -122,6 +128,7 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
     {
         return;
     }
+
     qDebug() << name;
     QString name_withoutsuffix = name;
     name_withoutsuffix.truncate(name_withoutsuffix.lastIndexOf("."));
@@ -138,6 +145,7 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
         img_original = imread(name.toLocal8Bit().toStdString());
         img_original.copyTo(img_drawing);
         int result = ReadPicQuad(name_withoutsuffix, &xxx);
+
         if ( !result )
         {
             ClearAllVariable();
@@ -149,6 +157,14 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
         if(img_drawing.empty())
             return;
         imshow("Picture",img_drawing);
+        if(JosnToPoint(name_withoutsuffix, face_point))
+        {
+            qDebug() << "draw";
+            int num_face;
+            for(num_face = 0; num_face < 106; num_face++)
+                circle(img_drawing, cvPoint(face_point[num_face].x,face_point[num_face].y), 0.5,Scalar(0, 255, 0),2,8,0);
+        }
+
         setMouseCallback("Picture", onMouse, 0);
     }else{
 //        fileout.ReadFile(name);
@@ -237,6 +253,14 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
                 img_original = imread(name.toLocal8Bit().toStdString());
                 img_original.copyTo(img_drawing);
                 int result = ReadPicQuad(name_withoutsuffix, &xxx);
+                if(JosnToPoint(name_withoutsuffix, face_point))
+                {
+
+                    qDebug() << "draw";
+
+
+                }
+
                 if ( !result )
                 {
                     ClearAllVariable();
@@ -362,7 +386,9 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
         case 'x':
             if (currentquad > -1) //Only when currentquad is exist can we draw quad
             {
+                //str[currentquad] + "," + scene[currentquad] + "," +language[currentquad] + "," + quality[currentquad]
                 LabelMark *widget = new LabelMark;
+                widget->set(str[currentquad], scene[currentquad], language[currentquad], quality[currentquad]);
                 widget->show();
                 connect(widget, SIGNAL(sendData(QString)), this, SLOT(receiveDataSave(QString)));
             }
@@ -371,6 +397,61 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
                 qDebug() << "Please draw the quad first";
             }
             break;
+        case 'y':
+            drawFlag = drawFlag ? 0 : 1;
+            break;
+        //case 8: //delete
+        case 0xffff:
+            name = m_strPath + "/" + m_imgList.at(counter);
+            QFile file(name);
+            if (file.exists())
+            {
+                file.remove();
+            }
+            ++counter;
+            ++framecounter;
+            ClearAllVariable();
+            if(flag){
+                if(m_imgList.count() == counter){
+                    qDebug() << "destroy!";
+//                    openwindow--;
+                    destroyWindow("Picture");
+                    img_drawing.release();
+                    return;
+                }
+                name = m_strPath + "/" + m_imgList.at(counter);
+                name_withoutsuffix = name;
+                name_withoutsuffix.truncate(name_withoutsuffix.lastIndexOf("."));
+                img_original = imread(name.toLocal8Bit().toStdString());
+                img_original.copyTo(img_drawing);
+                int result = ReadPicQuad(name_withoutsuffix, &xxx);
+                if ( !result )
+                {
+                    ClearAllVariable();
+                    destroyWindow("Picture");
+                    img_drawing.release();
+                    return;
+                }
+            }else{
+                capture >> img_original;   //move to the next frame
+                img_original.copyTo(img_drawing);
+//                QObject::connect(&fileout,SIGNAL(senddata(QString)),this,SLOT(receiveDataSave(QString)));
+//               fileout.ReadFramequad(img_drawing);
+                ReadFramequad(img_drawing);
+
+            }
+
+            if (img_original.empty()){
+                if(flag){
+                    destroyWindow("Picture");
+                }else{
+//                    fileout.VideoFinalInfInput(name);
+                    VideoFinalInfInput(framecounter, name_withoutsuffix);
+                    destroyWindow("Video");
+                }
+                return;
+            }
+
         }
 
         if(flag){
@@ -466,42 +547,100 @@ int isempty(Point * quad)
     return 1;
 }
 
-void onMouse(int event, int x, int y, int, void*)
+void onMouse(int event, int x, int y, int cvflag, void*param)
 {
 
-
-    switch (event)
+    static Point pre_pt;
+    static Point cur_pt;
+    char temp[16];
+    if(RECTANGLE == drawFlag)
     {
-    case CV_EVENT_LBUTTONDOWN:
-//        quad[quadNum][pointNum%4].x = x;
-//        quad[quadNum][pointNum%4].y = y;
-//        //cout<<"x = "<<x<<" y = "<<y<<endl;
-//        pointNum++;
-
-        break;
-    case CV_EVENT_LBUTTONUP:
-        //finish drawing the rect (use color green for finish)
-        quad[quadNum][pointNum%4].x = x;
-        quad[quadNum][pointNum%4].y = y;
-        //cout<<"x = "<<x<<" y = "<<y<<endl;
-        pointNum++;
-        circle(img_drawing,cvPoint(x,y),1,Scalar(0, 0, 255),2,8,0);
-
-        if(pointNum == 4)
+        switch (event)
         {
-            pointNum = 0;
-            cout<<"draw quadri line"<<endl;
-            quadNum++;
-            currentquad = quadNum - 1;
-            (*pstring) << "";
-            (*pscene) << "";
-            (*planguage) << "";
-            (*pquality) << "";
-            drawAllQuadri(0, *pstring);
+        case CV_EVENT_LBUTTONDOWN:
+                pre_pt = Point(x,y);
+                qDebug()<<pre_pt.x<<endl;
+                //sprintf(temp,"(%d,%d)",x,y);
+                //putText(img_drawing,temp,pre_pt,FONT_HERSHEY_SIMPLEX,0.5,Scalar(0,0,0,255),1,8);//在窗口上显示坐标
+                //circle(img,pre_pt,2,Scalar(255,0,0,0),CV_FILLED,CV_AA,0);//划圆
+                circle(img_drawing,pre_pt,1,Scalar(0, 0, 255),2,8,0);
+
+                break;
+
+            case CV_EVENT_LBUTTONUP:
+
+                    cur_pt = Point(x,y);
+                   // putText(img_drawing,temp,cur_pt,FONT_HERSHEY_SIMPLEX,0.5,Scalar(0,0,0,255));
+                    circle(img_drawing,pre_pt,2,Scalar(255,0,0,0),CV_FILLED,CV_AA,0);
+                    //finish drawing the rect (use color green for finish)
+                    int deltx, delty;
+                    deltx = cur_pt.x - pre_pt.x;
+                    delty = cur_pt.y - pre_pt.y;
+                    quad[quadNum][0].x = pre_pt.x;
+                    quad[quadNum][0].y = pre_pt.y;
+                    quad[quadNum][1].x = pre_pt.x;
+                    quad[quadNum][1].y = pre_pt.y + delty;
+                    quad[quadNum][3].x = pre_pt.x + deltx;
+                    quad[quadNum][3].y = pre_pt.y;
+                    quad[quadNum][2].x = cur_pt.x;
+                    quad[quadNum][2].y = cur_pt.y;
+                    //cout<<"x = "<<x<<" y = "<<y<<endl;
+                    pointNum = 4;
+                    circle(img_drawing,cvPoint(x,y),1,Scalar(0, 0, 255),1,8,0);
+
+                    if(pointNum == 4)
+                    {
+                        pointNum = 0;
+                        cout<<"draw quadri line"<<endl;
+                        quadNum++;
+                        currentquad = quadNum - 1;
+                        (*pstring) << "";
+                        (*pscene) << "";
+                        (*planguage) << "";
+                        (*pquality) << "";
+                        drawAllQuadri(0, *pstring);
+
+                    }
+                    break;
+
 
         }
+    }
+    else
+    {
+        switch (event)
+        {
+        case CV_EVENT_LBUTTONDOWN:
+    //        quad[quadNum][pointNum%4].x = x;
+    //        quad[quadNum][pointNum%4].y = y;
+    //        //cout<<"x = "<<x<<" y = "<<y<<endl;
+    //        pointNum++;
 
-        break;
+            break;
+        case CV_EVENT_LBUTTONUP:
+            //finish drawing the rect (use color green for finish)
+            quad[quadNum][pointNum%4].x = x;
+            quad[quadNum][pointNum%4].y = y;
+            //cout<<"x = "<<x<<" y = "<<y<<endl;
+            pointNum++;
+            circle(img_drawing,cvPoint(x,y),1,Scalar(0, 0, 255),1,8,0);
+
+            if(pointNum == 4)
+            {
+                pointNum = 0;
+                cout<<"draw quadri line"<<endl;
+                quadNum++;
+                currentquad = quadNum - 1;
+                (*pstring) << "";
+                (*pscene) << "";
+                (*planguage) << "";
+                (*pquality) << "";
+                drawAllQuadri(0, *pstring);
+
+            }
+            break;
+        }
+
     }
     if (flags){
 //        destroyWindow("Picture");
@@ -694,7 +833,7 @@ int ImageWidget::PicInfInput(QString name, int quadNum)
         cout << "please ensure the number of Transcriptions is equal to the number of the quad"  << endl;
         return 0;
     }
-    QFile file(name+".txt");
+    /*QFile file(name+".txt");
     if(!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
         return 0;
     QTextStream stream(&file);
@@ -719,6 +858,7 @@ int ImageWidget::PicInfInput(QString name, int quadNum)
     }
     stream << "row=" << img_drawing.rows << "," << "columns=" << img_drawing.cols;
     file.close();
+    */
     return 1;
 }
 
@@ -853,4 +993,53 @@ int ImageWidget::TxtlineToPointandtrans(int counter, QStringList PointandTrans)
     languagetranscription = PointandTrans[j++];
     qualitytranscription = PointandTrans[j];
     return 1;
+}
+bool ImageWidget::JosnToPoint(QString name, Point *face_point)
+{
+
+
+        QFile file(name+".json");
+        if (!file.open(QIODevice::ReadOnly))
+        {
+            qDebug() << "The json file is in wrong state, please ensure the json file is readable.";
+            return 0;
+        }
+        QByteArray allData = file.readAll();
+        file.close();
+        QJsonParseError json_error;
+        QJsonDocument jsonDoc(QJsonDocument::fromJson(allData, &json_error));
+
+        if(json_error.error != QJsonParseError::NoError)
+        {
+            qDebug() << "json error!";
+            return 0;
+        }
+        QJsonObject rootObj = jsonDoc.object();
+        if(rootObj.isEmpty())
+            qDebug()<<"why?";
+
+        //find face
+
+        QJsonArray faces = rootObj.value("faces").toArray();
+        qDebug() << faces.size();
+        int color[faces.size()];
+        for(int num_face = 0; num_face < faces.size();num_face++)
+        {
+            QJsonObject landmark = faces.at(num_face).toObject().value("landmark").toObject();
+            QStringList keys = landmark.keys();
+            color[num_face] = 255;
+            int i = 0;
+            qDebug() << landmark.size();
+            for(i = 0; i < landmark.size(); i++)
+            {
+                QJsonObject obj = landmark.value(keys.at(i)).toObject();
+                face_point[i].y = obj["y"].toInt();
+                face_point[i].x = obj["x"].toInt();
+                circle(img_drawing, cvPoint(face_point[i].x,face_point[i].y), 0.5,Scalar(0,255, 0),2,8,0);
+
+            }
+        }
+        return 1;
+
+
 }

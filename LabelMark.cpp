@@ -38,3 +38,27 @@ void LabelMark::keyPressEvent(QKeyEvent * event){
 
 
 }
+void LabelMark::set(QString strs, QString scene, QString language, QString quality){
+
+    int find_index = ui->comboBox->findText(scene, Qt::MatchExactly);
+    if(find_index != -1)
+         ui->comboBox->setCurrentIndex(find_index);
+    else
+         ui->comboBox->setCurrentIndex(index[0]);
+
+    int find_index1 = ui->comboBox_2->findText(language, Qt::MatchExactly);
+    if(find_index1 != -1)
+         ui->comboBox_2->setCurrentIndex(find_index1);
+    else
+         ui->comboBox_2->setCurrentIndex(index[1]);
+
+    int find_index2 = ui->comboBox_3->findText(quality, Qt::MatchExactly);
+    if(find_index2 != -1)
+         ui->comboBox_3->setCurrentIndex(find_index2);
+    else
+         ui->comboBox_3->setCurrentIndex(index[2]);
+
+    if(!(strs.isEmpty()))
+        ui->markLine->setText(strs);
+
+}

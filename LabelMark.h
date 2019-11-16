@@ -21,6 +21,7 @@ class LabelMark : public QWidget
 
 public:
     explicit LabelMark(QWidget *parent = 0);
+    void set(QString strs, QString scene, QString language, QString quality);
     ~LabelMark();
 private:
     Ui::LabelMark *ui;
@@ -28,7 +29,10 @@ private:
 
 private:
     QString str ;
-
+    QString strs;
+    QString scene;
+    QString language;
+    QString quality;
 signals:
     //return QString to the main window
     void sendData(QString);
